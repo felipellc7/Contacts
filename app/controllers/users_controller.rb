@@ -15,18 +15,15 @@ class UsersController < ApplicationController
       render json: {error: "Email already taken"}, status: 401
     else
       ## Create New User
-      params = {
-        email: u_params[:email],
-        password: u_params[:password],
-        password_confirmation: u_params[:password],
-        name: u_params[:name],
-      }
-      @user = User.create(params)
-      set_token
+      @user = User.create(u_params)
       ## Save to access_token column in Spree::User
+      set_token
       @user.access_token = @token
-      @user.save
-      render json: set_response, status: 201
+      if @user.save
+        render json: set_response, status: 201
+      else
+        render json: @user.errors, status: 422
+      end
     end
   end
   def sign_out
@@ -37,18 +34,27 @@ class UsersController < ApplicationController
       render json: { error: 'Invalid Action.' }, status: 401
     end
   end
+
+  def profile
+    data = open(File.join('./public', @current_user.photo.url))
+    send_data data.read, type: @current_user.photo.content_type, disposition: 'inline'
+  end
   private
   def user_exists?
     User.exists?(email: u_params[:email])
   end
   def u_params
-    params.require(:user).permit(:email, :password, :name)
+    # params.require(:user).permit(:email, :password, :name, :address, :phone, :photo)
+    params.permit(:email, :password, :name, :address, :phone, :photo)
   end
   def set_response
     response = {
-      user_id: @user.id,
-      email: @user.email,
+      id: @user.id,
       name: @user.name,
+      email: @user.email,
+      address: @user.address,
+      phone: @user.phone,
+      photo_url: @user.photo.url,
       access_token: @user.access_token
     }
   end

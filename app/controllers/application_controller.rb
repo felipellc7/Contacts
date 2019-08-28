@@ -12,7 +12,8 @@ class ApplicationController < ActionController::Base
   end
   def set_token
     @token ||= Authentication::Login.new(
-      params[:user][:email], params[:user][:password]
+      # params[:user][:email], params[:user][:password]
+      params[:email], params[:password]
     ).execute
   end
 end
