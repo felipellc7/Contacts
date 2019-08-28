@@ -1,16 +1,15 @@
 class UsersController < ApplicationController
-	before_action :authenticate_user_by_token, except: [:sign_in, :sign_up]
-
+  before_action :authenticate_user_by_token, except: [:sign_in, :sign_up]
   def sign_in
     set_token
     @user = User.find_by_email(u_params[:email])
     if @token
+      @user.update_columns access_token: @token
       render json: set_response, status: 200
     else
       render json: { error: 'Invalid user.' }, status: 401
     end
   end
-
   def sign_up
     if user_exists?
       render json: {error: "Email already taken"}, status: 401
@@ -27,30 +26,30 @@ class UsersController < ApplicationController
       ## Save to access_token column in Spree::User
       @user.access_token = @token
       @user.save
-      render json: set_response, status: 200
+      render json: set_response, status: 201
     end
   end
-
-  def other
-    render json: {message: "Hello!"}, status: 200
+  def sign_out
+    if @current_user.access_token.present?
+      @current_user.update_columns access_token: nil
+      render json: {}, status: 200
+    else
+      render json: { error: 'Invalid Action.' }, status: 401
+    end
   end
-
   private
-
   def user_exists?
     User.exists?(email: u_params[:email])
   end
-
   def u_params
     params.require(:user).permit(:email, :password, :name)
   end
-
   def set_response
     response = {
       user_id: @user.id,
       email: @user.email,
       name: @user.name,
-      access_token: @token
+      access_token: @user.access_token
     }
   end
 end
