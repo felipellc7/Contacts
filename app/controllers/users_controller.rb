@@ -36,9 +36,27 @@ class UsersController < ApplicationController
   end
 
   def profile
-    data = open(File.join('./public', @current_user.photo.url))
-    send_data data.read, type: @current_user.photo.content_type, disposition: 'inline'
+    render json: @current_user.slice(:id, :name, :email, :address, :phone, :photo), status: 200
   end
+
+  def update_profile
+    if @current_user.update_attributes(u_params)
+      render json: @current_user.slice(:id, :name, :email, :address, :phone, :photo), status: 200
+    else
+      render json: { error: @current_user.errors }, status: 422
+    end
+  end
+
+  def update_profile_photo
+    @current_user.photo = u_params[:photo]
+    if @current_user.save
+      data = open(File.join('./public', @current_user.photo.url))
+      send_data data.read, type: @current_user.photo.content_type, disposition: 'inline'
+    else
+      render json: { status: 422, errors: [ { detail: @current_user.errors}] }, status: 422
+    end
+  end
+
   private
   def user_exists?
     User.exists?(email: u_params[:email])
