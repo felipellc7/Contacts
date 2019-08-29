@@ -7,12 +7,13 @@ class ApplicationController < ActionController::Base
       request.headers["Authorization"]
     ).execute
     unless current_user && (request.headers["Authorization"] == @current_user.access_token)
-      render json: { error: 'Access Denied.' }, status: 401
+      render json: { status: 401, errors: [ { detail: 'Access Denied.'}] }, status: 401
     end
   end
   def set_token
     @token ||= Authentication::Login.new(
-      params[:user][:email], params[:user][:password]
+      # params[:user][:email], params[:user][:password]
+      params[:email], params[:password]
     ).execute
   end
 end

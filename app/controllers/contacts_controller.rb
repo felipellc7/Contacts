@@ -10,7 +10,7 @@ class ContactsController < ApplicationController
     if @contact
       render json: @contact, status: 200
     else
-      render json: { status: 404, errors: [ { details: @contact.errors } ] }, status: 404
+      render json: { status: 404, errors: [ { details: @contact } ] }, status: 404
     end
   end
 
@@ -32,7 +32,7 @@ class ContactsController < ApplicationController
         render json: { status: 422, errors: [ { details: @contact.errors } ] }, status: 422
       end
     else
-      render json: { status: 404, errors: [ { details: @contact.errors } ] }, status: 404
+      render json: { status: 404, errors: [ { details: @contact } ] }, status: 404
     end
   end
 
@@ -44,7 +44,7 @@ class ContactsController < ApplicationController
         render json: { status: 422, errors: [ { details: @contact.errors } ] }, status: 422
       end
     else
-      render json: { status: 404, errors: [ { details: @contact.errors } ] }, status: 404
+      render json: { status: 404, errors: [ { details: @contact } ] }, status: 404
     end
   end
 
